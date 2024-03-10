@@ -33,11 +33,9 @@ export function createNetwork() {
 }
 
 export async function networkFetch(params: RequestParameters, variables: Variables, headers = {}) {
-  const response = await fetch(
-    // TODO: figure out how not to use hardcoded hostname and port
-    // TODO: consider bypassing api fetch and directly invoking graphql on server
-    'http://localhost:5001/graphql',
-    {
+  const url = 'http://localhost:3000/graphql'; // move this to a .env
+
+  const response = await fetch(url, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -50,9 +48,11 @@ export async function networkFetch(params: RequestParameters, variables: Variabl
         operationName: params.name
       }),
       // credentials: 'same-origin',
-      credentials: 'include',
+      // credentials: 'include',
     },
   );
 
-  return response.json();
+  const data = await response.json();
+
+  return data;
 }

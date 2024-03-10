@@ -1,34 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { json, useLoaderData } from "react-router-dom";
+import ReactRelay from "react-relay";
 
-function App() {
-  const [count, setCount] = useState(0)
+const { usePreloadedQuery, PreloadedQuery, graphql, useRelayEnvironment } =
+  ReactRelay;
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+export const App = () => {
+  const loaderData = useLoaderData();
+
+  const environment = useRelayEnvironment();
+
+  const queryId =
+    loaderData.rootQuery.params.id || loaderData.rootQuery.params.text;
+  const params = loaderData.rootQuery.params;
+  const variables = loaderData.rootQuery.variables;
+
+  const rootQuery = {
+    environment,
+    fetchKey: queryId,
+    fetchPolicy: "store-or-network",
+    isDisposed: false,
+    name: params.name,
+    kind: "PreloadedQuery",
+    variables,
+  };
+
+  const data = usePreloadedQuery(
+    graphql`
+      query AppQuery {
+        version
+      }
+    `,
+    rootQuery
+  );
+
+  return <h1>version: {data.version}</h1>
 }
-
-export default App

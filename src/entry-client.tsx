@@ -1,4 +1,3 @@
-import './index.css'
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import {
@@ -24,5 +23,13 @@ ReactDOM.hydrateRoot(
         <RouterProvider router={router} />
       </Suspense>
     </RelayEnvironmentProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
+  {
+    onRecoverableError: (error, args) => {
+      // eslint-disable-next-line
+      console.log('onRecovarableError', error);
+      // eslint-disable-next-line
+      console.log('onRecovarableError', args.componentStack);
+    },
+  }
 )

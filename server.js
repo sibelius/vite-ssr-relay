@@ -52,7 +52,20 @@ app.use("*", async (req, res) => {
       render = (await import("./dist/server/entry-server.js")).render;
     }
 
-    render(req, res, url, ssrManifest);
+    const rendered = await render(req, url, ssrManifest)
+
+    const html = template
+      .replace(`<!--app-head-->`, rendered.head ?? '')
+      .replace(`<!--app-html-->`, rendered.html ?? '')
+
+    console.log({
+      template,
+      head: rendered.head,
+      html: rendered.html,
+      html2: html,
+    });
+
+    res.status(200).set({ 'Content-Type': 'text/html' }).send(html)
   } catch (e) {
     vite?.ssrFixStacktrace(e);
     console.log(e.stack);

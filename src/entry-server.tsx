@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOMServer from "react-dom/server";
 import {
   createStaticHandler,
   createStaticRouter,
@@ -12,6 +11,7 @@ let handler = createStaticHandler(routes);
 
 import ReactRelay from "react-relay";
 import { createEnvironment } from "../src/relay/relayEnvironment";
+import { renderToPipeableStreamPromise } from './renderToPipeableStreamPromise';
 
 const { RelayEnvironmentProvider } = ReactRelay;
 
@@ -23,17 +23,16 @@ export async function render(req, res) {
 
   let router = createStaticRouter(handler.dataRoutes, context);
 
-  const { pipe, abort } = ReactDOMServer.renderToPipeableStream(
-    <React.StrictMode>
-      <RelayEnvironmentProvider environment={environment}>
-        <StaticRouterProvider router={router} context={context} />
-      </RelayEnvironmentProvider>
-    </React.StrictMode>
-  , {
-      onShellReady() {
-        res.statusCode = 200;
-        res.setHeader("content-type", "text/html");
-        pipe(res);
-      },
-    });
+  const tree = (<React.StrictMode>
+    <RelayEnvironmentProvider environment={environment}>
+      <StaticRouterProvider router={router} context={context} />
+    </RelayEnvironmentProvider>
+  </React.StrictMode>
+  );
+
+  const html = await renderToPipeableStreamPromise(tree);
+
+  return {
+    html,
+  }
 }
